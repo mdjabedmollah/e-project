@@ -158,7 +158,7 @@ export const login = async (req, res) => {
         message: "invalid credentials",
       });
     }
-    if (exisitingUser.isVarified === false) {
+    if (exisitingUser.isVerified === false) {  
       return res.status(400).json({
         success: false,
         message: "email not verified,please verify your email",
@@ -184,7 +184,7 @@ export const login = async (req, res) => {
       await Session.deleteOne({ userId: exisitingUser._id });
     }
     //create a new one
-    await Session.create({ useruserId: exisitingUser._id });
+    await Session.create({userId: exisitingUser._id });
 
     return res.status(200).json({
       success: true,
