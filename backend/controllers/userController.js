@@ -243,3 +243,96 @@ export const forgetPassword=async(req,res)=>{
     
   }
 }
+export const verityOTP=async(req,res)=>{
+    try {
+        const {otp}=req.body;
+        const {email}=req.params
+        if(!otp){
+            return res.status(400).json({
+                success:false,
+                message:"please provite the opt"
+            })
+        }
+        const user= await User.findOne({email})
+        if(!user){
+            return res.status(400).json({
+                success:false,
+                message:"user not found"
+            })
+        }
+        if(!user.otp || !user.otpExpiry){
+            return res.status(400).json({
+                success:false,
+                message:"Opt is not generated or already used"
+            })
+        }
+        if(user.otpExpiry < new Date()){
+             return res.status(400).json({
+                success:false,
+                message:"OTP expired,please request a new one"
+            })
+        }
+
+        if(user.opt !==user.opt){
+             return res.status(400).json({
+                success:false,
+                message:"Opt is invalid"
+            })
+        }
+        user.otp=null;
+        user.otpExpiry=null;
+        await user.save();
+         return res.status(200).json({
+                success:true,
+                message:"OTP verified successfully"
+            })
+
+    } catch (error) {
+        return res.status(500).json({
+            success:false,
+            message:error.message
+        })
+    }
+}
+
+export const changePassword=async(req,res)=>{
+    try {
+      const {newPassword,conFirmPassword}=req.body;
+      const {email}=req.params
+      const user=await User.findOne({email})
+
+      if(!user){
+        return res.status(400).json({
+          success:false,
+          message:"User not found"
+        })
+
+      }
+      if(!newPassword || !conFirmPassword){
+         return res.status(400).json({
+          success:false,
+          message:"all fields are required"
+        })
+      }
+      if(newPassword !== conFirmPassword){
+        return res.status(400).json({
+          success:false,
+          message:"passwords do not match"
+        })
+      }
+      const hash=await bcrypt.hash(newPassword,10)
+     user.password=hash
+      await user.save()
+       return res.status(200).json({
+          success:true,
+          message:"Password changed successfully"
+        })
+
+
+    } catch (error) {
+      return res.status(500).json({
+      success:false,
+      message:error.message
+    })
+    }
+}
