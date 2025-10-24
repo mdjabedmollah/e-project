@@ -1,6 +1,7 @@
 import jwt from "jsonwebtoken";
 import { User } from "../models/userModels.js";
 
+
 export const isAuthenticated = async (req, res, next) => {
   try {
     const authHeader = req.headers.authorization;
@@ -44,10 +45,10 @@ export const isAuthenticated = async (req, res, next) => {
 
     // Step 5: Attach user info to request
     req.id = user._id;
+    req.user=user
 
     // Step 6: Continue to next middleware
     next();
-
   } catch (error) {
     return res.status(500).json({
       success: false,
@@ -55,3 +56,19 @@ export const isAuthenticated = async (req, res, next) => {
     });
   }
 };
+export const isAdmin = async (req, res, next) => {
+  try {
+    if (req.user && req.user.role === "admin") {
+      next();
+    } else {
+      res.status(401).json({ message: "Unauthorized, Admins only" });
+    }
+  } catch (error) {
+    return res.status(500).json({
+      success: false,
+      message: error.message,
+    });
+  }
+};
+
+

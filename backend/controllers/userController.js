@@ -336,3 +336,38 @@ export const changePassword=async(req,res)=>{
     })
     }
 }
+
+export const allUsers=async(req,res)=>{
+  try {
+    const user=await User.find()
+    return res.status(200).json({
+      success:true,
+      user
+    })
+  } catch (error) {
+    return res.status(500).json({
+      success:false,
+      message:error.message
+    })
+  }
+}
+
+export const getUserById=async(req,res)=>{
+  try {
+    const {userId}=req.params;
+    const user=await User.findById(userId).select("-password -otp -otpExpiry -token");
+    if(!user){
+      return res.status(400).json({
+        success:false,
+        message:"user not found"
+      })
+    }
+    return res.status(200).json({
+      success:true,
+      user
+    })
+    
+  } catch (error) {
+    
+  }
+}
